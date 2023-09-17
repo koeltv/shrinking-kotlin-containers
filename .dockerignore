@@ -1,0 +1,5 @@
+### Ignore Gradle files
+.gradle
+**/build/
+!src/**/build/
+*.log
