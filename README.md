@@ -30,6 +30,7 @@ you can learn more about them by following [this link](https://bell-sw.com/liber
 ### glibc / musl libc
 
 Both libraries are implementations of the C standard library for Unix-like systems. It is the interface between the application and the kernel (file interactions, network communications, ...).
+In the statistics, both will be counted as libraries.
 
 #### glibc
 
@@ -52,8 +53,7 @@ It will build and tag all the `.dockerfile`, so that you can see the differences
 
 In each section, you will find a measurement of the size of the various parts of each image and their final size.
 Those numbers may change depending on a few factors, like the version of the base image used, and should only be used as a comparison.
-Sometimes since the base image and libraries are bundled in a single layer they can't be counted separately, and are therefore counted together.
-This will be indicated with `... (+ libraries)` in the base image size column, and `---` in the libraries size column.
+Sometimes since the base image and libraries are bundled in a single layer they are either estimated via an archive if available or are counted together (indicated with `... (+ libraries)` in the base image size column, and `---` in the libraries size column).
 Also, you may find that sometimes the individual numbers don't exactly add up to the total size. That is because of rounding, as the total is what you will see with `docker image ls` and the individual numbers were calculated from the individual layers.
 
 The jar itself has a size of `16.9 KB` and the fatJar has a size of `10.7 MB`.
@@ -63,10 +63,10 @@ Here is the simplest but **heaviest** alternative, we build and run the applicat
 
 <img src="./images/all-in-one-with-tools.png" width="250" alt="all-in-one with tools diagram"/>
 
-| Base image                                                              | Base image size | Libraries size | Tooling size | Application Size | Size    |
-|-------------------------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
-| [gradle:8.3-jdk17](./all-in-one-gradle-full.dockerfile)                 | 77.82 MB        | 208.13 MB      | 966.57 MB    | 29.76 MB         | 1.28 GB |
-| [gradle:8.3-jdk17-alpine](./all-in-one-gradle.dockerfile)               | 7.34 MB         | 108.61 MB      | 965.28 MB    | 29.76 MB         | 1.11 GB |
+| Base image                                                | Base image size | Libraries size | Tooling size | Application Size | Size    |
+|-----------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
+| [gradle:8.3-jdk17](./all-in-one-gradle-full.dockerfile)   | 77.82 MB        | 208.13 MB      | 985.63 MB    | 10.7 MB          | 1.28 GB |
+| [gradle:8.3-jdk17-alpine](./all-in-one-gradle.dockerfile) | 6.07 MB         | 109.87 MB      | 983.34 MB    | 10.7 MB          | 1.11 GB |
 
 ## All-in-one builds
 A simpler, but still heavy alternative is to use the [bundled gradle wrapper](./gradlew).
@@ -76,8 +76,8 @@ Thus, we just need an image with a JDK.
 
 | Base image                                                              | Base image size | Libraries size | Tooling size | Application Size | Size    |
 |-------------------------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
-| [eclipse-temurin:17-jdk](./all-in-one-full.dockerfile)                  | 77.82 MB        | 50.02 MB       | 1070 MB      | 29.75 MB         | 1.22 GB |
-| [eclipse-temurin:17-jdk-alpine](./all-in-one.dockerfile)                | 7.34 MB         | 19.02 MB       | 1068.69 MB   | 29.75 MB         | 1.12 GB |
+| [eclipse-temurin:17-jdk](./all-in-one-full.dockerfile)                  | 77.82 MB        | 50.02 MB       | 1089.05 MB   | 10.7 MB          | 1.22 GB |
+| [eclipse-temurin:17-jdk-alpine](./all-in-one.dockerfile)                | 6.07 MB         | 20.28 MB       | 1087.74 MB   | 10.7 MB          | 1.12 GB |
 | bellsoft/liberica-runtime-container:jdk-all-17-glibc                    |                 |                |              |                  | 1.05 GB |
 | bellsoft/liberica-runtime-container:jdk-all-17-musl                     |                 |                |              |                  | 1.04 GB |
 | bellsoft/liberica-runtime-container:jdk-all-17-slim-musl                |                 |                |              |                  | 1.03 GB |
@@ -93,8 +93,8 @@ From this point, the size of the builder image (first step) isn't considered, as
 
 | Base image                                                | Base image size | Libraries size | Tooling size | Application Size | Size      |
 |-----------------------------------------------------------|-----------------|----------------|--------------|------------------|-----------|
-| [eclipse-temurin:17-jre](./multi-stage-full.dockerfile)   | 77.82 MB        | 50.02 MB       | 140.82 MB    | 11.25 MB         | 279.91 MB |
-| [eclipse-temurin:17-jre-alpine](./multi-stage.dockerfile) | 7.34 MB         | 19.02 MB       | 140.15 MB    | 11.25 MB         | 177.74 MB |
+| [eclipse-temurin:17-jre](./multi-stage-full.dockerfile)   | 77.82 MB        | 50.02 MB       | 141.37 MB    | 10.7 MB          | 279.91 MB |
+| [eclipse-temurin:17-jre-alpine](./multi-stage.dockerfile) | 6.07 MB         | 20.28 MB       | 140.7 MB     | 10.7 MB          | 177.74 MB |
 | bellsoft/liberica-runtime-container:jre-17-glibc          |                 |                |              |                  |           |
 | bellsoft/liberica-runtime-container:jre-17-musl           |                 |                |              |                  |           |
 | bellsoft/liberica-runtime-container:jre-17-slim-musl      |                 |                |              |                  |           |
@@ -114,13 +114,13 @@ I am also using the [alpaquita linux distribution by Bellsoft](https://bell-sw.c
 
 <img src="./images/custom-jre.png" width="250" alt="custom jre diagram"/>
 
-| Base image                                                                 | Base image size         | Libraries size | Tooling size | Application Size | Size      |
-|----------------------------------------------------------------------------|-------------------------|----------------|--------------|------------------|-----------|
-| [debian:12.1](./custom-jre-debian.dockerfile)                              | 116.49 MB (+ libraries) | ---            | 65.21 MB     | 11.25 MB         | 192.94 MB |
-| [debian:12.1-slim](./custom-jre-debian-slim.dockerfile)                    | 74.76 MB (+ libraries)  | ---            | 65.21 MB     | 11.25 MB         | 151.21 MB |
-| [alpine:3.18.3](./custom-jre.dockerfile)                                   | 7.34 MB (+ libraries)   | ---            | 64.58 MB     | 11.25 MB         | 83.16 MB  |
-| [bellsoft/alpaquita-linux-base](./custom-jre-alpaquita.dockerfile)         | 7.44 MB (+ libraries)   | ---            | 64.58 MB     | 11.25 MB         | 83.26 MB  |
-| [gcr.io/distroless/java-base-debian12](./custom-jre-distroless.dockerfile) | 1.99 MB                 | 31.3 MB        | 65.21 MB     | 11.25 MB         | 109.75 MB |
+| Base image                                                                 | Base image size       | Libraries size | Tooling size | Application Size | Size      |
+|----------------------------------------------------------------------------|-----------------------|----------------|--------------|------------------|-----------|
+| [debian:12.1](./custom-jre-debian.dockerfile)                              | 31.34 MB              | 85.14 MB       | 65.76 MB     | 10.7 MB          | 192.94 MB |
+| [debian:12.1-slim](./custom-jre-debian-slim.dockerfile)                    | 31.34 MB              | 43.41 MB       | 65.76 MB     | 10.7 MB          | 151.21 MB |
+| [alpine:3.18.3](./custom-jre.dockerfile)                                   | 6.07 MB               | 1.26 MB        | 65.13 MB     | 10.7 MB          | 83.16 MB  |
+| [bellsoft/alpaquita-linux-base](./custom-jre-alpaquita.dockerfile)         | 7.44 MB (+ libraries) | ---            | 65.13 MB     | 10.7 MB          | 83.26 MB  |
+| [gcr.io/distroless/java-base-debian12](./custom-jre-distroless.dockerfile) | 1.99 MB               | 31.3 MB        | 65.76 MB     | 10.7 MB          | 109.75 MB |
 
 You can also play with the JLink options (`jlinkOptions` in [gradle.properties](./gradle.properties)).
 
@@ -151,7 +151,7 @@ In the next tables I will also specify the builder image, as it does influence t
 | Builder image                                                   | Base image                                                  | Base image size       | Libraries size | Application Size | Size     |
 |-----------------------------------------------------------------|-------------------------------------------------------------|-----------------------|----------------|------------------|----------|
 | ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/java-base-debian12](./native.dockerfile) | 1.99 MB               | 31.3 MB        | 38.93 MB         | 72.22 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./native-alpine-nik.dockerfile)             | 7.34 MB (+ libraries) | ---            | 37.75 MB         | 45.08 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./native-alpine-nik.dockerfile)             | 6.07 MB               | 1.26 MB        | 37.75 MB         | 45.08 MB |
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./native-nik.dockerfile)    | 7.44 MB (+ libraries) | ---            | 37.75 MB         | 45.19 MB |
 
 ## Mostly static native image
@@ -163,7 +163,7 @@ This lets us run the application on any Linux `libc`-based distribution.
 | Builder image                                                   | Base image                                                             | Base image size       | Libraries size | Application Size | Size     |
 |-----------------------------------------------------------------|------------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
 | ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/base-debian12](./mostly-static-native.dockerfile)   | 1.99 MB               | 18.69 MB       | 38.97 MB         | 59.63 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)          | 7.34 MB (+ libraries) | ---            | 37.8 MB          | 45.13 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)          | 6.07 MB               | 1.26 MB        | 37.8 MB          | 45.13 MB |
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./mostly-static-native-nik.dockerfile) | 7.44 MB (+ libraries) | ---            | 37.8 MB          | 45.23 MB |
 
 
@@ -190,10 +190,14 @@ Why use `gcr.io/distroless/static` then ? It includes :
 
 ## Overall comparison
 
-This graph resume the differences between each step. The first 2 steps are not included as they have a far bigger size than the others (3 to 5 times compared to the next step),
-making the chart a lot less readable.
+The graphs resume the differences between each step. The first 2 steps are not included as they have a far bigger size than the others (3 to 5 times compared to the next step),
+making the charts a lot less readable.
 
-For easier comparison, only the alpine-based image has been chosen at each step.
+For easier comparison, there is a graph with Linux-based images and another with Alpine-Linux-based images.
 Please note that for images that don't have distinct base image and libraries sizes, both are counted as base image size.
 
-<img src="./images/comparison-graph.png" width="100%" alt="static diagram"/>
+<img src="./images/linux-comparison-graph.png" width="100%" alt="linux-based images comparison diagram"/>
+<br>
+<img src="./images/alpine-linux-comparison-graph.png" width="100%" alt="linux-based images comparison diagram"/>
+
+The issue here with mostly static images in alpine-linux is that it is hard to find a base image having just `glibc` or `musl lib`, but if you were to find one, it would be a small decrease from the dynamically linked native image.
