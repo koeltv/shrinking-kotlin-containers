@@ -30,6 +30,7 @@ you can learn more about them by following [this link](https://bell-sw.com/liber
 ### glibc / musl libc
 
 Both libraries are implementations of the C standard library for Unix-like systems. It is the interface between the application and the kernel (file interactions, network communications, ...).
+You can learn more about `libc` libraries [here](https://en.wikipedia.org/wiki/C_standard_library) and [here](https://www.etalabs.net/compare_libcs.html).
 In the statistics, both will be counted as libraries.
 
 #### glibc
@@ -74,13 +75,21 @@ Thus, we just need an image with a JDK.
 
 <img src="./images/all-in-one.png" width="250" alt="all-in-one diagram"/>
 
-| Base image                                                              | Base image size | Libraries size | Tooling size | Application Size | Size    |
-|-------------------------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
-| [eclipse-temurin:17-jdk](./all-in-one-full.dockerfile)                  | 77.82 MB        | 50.02 MB       | 1089.05 MB   | 10.7 MB          | 1.22 GB |
-| [eclipse-temurin:17-jdk-alpine](./all-in-one.dockerfile)                | 6.07 MB         | 20.28 MB       | 1087.74 MB   | 10.7 MB          | 1.12 GB |
-| bellsoft/liberica-runtime-container:jdk-all-17-glibc                    |                 |                |              |                  | 1.05 GB |
-| bellsoft/liberica-runtime-container:jdk-all-17-musl                     |                 |                |              |                  | 1.04 GB |
-| bellsoft/liberica-runtime-container:jdk-all-17-slim-musl                |                 |                |              |                  | 1.03 GB |
+| Base image                                                                             | Base image size         | Libraries size | Tooling size | Application Size | Size    |
+|----------------------------------------------------------------------------------------|-------------------------|----------------|--------------|------------------|---------|
+| [eclipse-temurin:17-jdk](./all-in-one-full.dockerfile)                                 | 77.82 MB                | 50.02 MB       | 1089.05 MB   | 10.7 MB          | 1.22 GB |
+| [eclipse-temurin:17-jdk-alpine](./all-in-one.dockerfile)                               | 6.07 MB                 | 20.28 MB       | 1087.74 MB   | 10.7 MB          | 1.12 GB |
+| [bitnami/java:17.0.8-7](./all-in-one-bitnami.dockerfile)                               | 510.04 MB (+ libraries) | ---            | ---          | 10.7 MB          | 1.33 GB |
+| [azul/zulu-openjdk:17.0.8.1](./all-in-one-azul.dockerfile)                             | 77.82 MB (+ libraries)  | ---            | 1109.4 MB    | 10.7 MB          | 1.21 GB |
+| [azul/zulu-openjdk-alpine:17.0.8.1](./all-in-one-azul-alpine.dockerfile)               | 7.06 MB (+ libraries)   | ---            | 1078.31 MB   | 10.7 MB          | 1.11 GB |
+| [amazoncorretto:17.0.8](./all-in-one-correto.dockerfile)                               | 164.71 MB (+ libraries) | ---            | 1091.13 MB   | 10.7 MB          | 1.28 GB |
+| [amazoncorretto:17.0.8-alpine](./all-in-one-correto-alpine.dockerfile)                 | 7.34 MB (+ libraries)   | ---            | 1072.82 MB   | 10.7 MB          | 1.1 GB  |
+| [ibm-semeru-runtimes:open-17.0.8_7-jdk](./all-in-one-ibm.dockerfile)                   | 77.82 MB (+ libraries)  | ---            | 1161.32 MB   | 10.7 MB          | 1.82 GB |
+| [sapmachine:17.0.8.1-jdk-ubuntu](./all-in-one-sapmachine.dockerfile)                   | 77.82 MB (+ libraries)  | ---            | 1132.12 MB   | 10.7 MB          | 1.24 GB |
+| [sapmachine:17.0.8.1-jdk-headless-ubuntu](./all-in-one-sapmachine-headless.dockerfile) | 77.82 MB (+ libraries)  | ---            | 1135.58 MB   | 10.7 MB          | 1.23 GB |
+| bellsoft/liberica-runtime-container:jdk-all-17-glibc                                   |                         |                |              |                  | 1.05 GB |
+| bellsoft/liberica-runtime-container:jdk-all-17-musl                                    |                         |                |              |                  | 1.04 GB |
+| bellsoft/liberica-runtime-container:jdk-all-17-slim-musl                               |                         |                |              |                  | 1.03 GB |
 
 ## Multi-stage builds
 We now create 2 distincts step:
@@ -91,13 +100,18 @@ From this point, the size of the builder image (first step) isn't considered, as
 
 <img src="./images/multi-stage.png" width="250" alt="multi-stage diagram"/>
 
-| Base image                                                | Base image size | Libraries size | Tooling size | Application Size | Size      |
-|-----------------------------------------------------------|-----------------|----------------|--------------|------------------|-----------|
-| [eclipse-temurin:17-jre](./multi-stage-full.dockerfile)   | 77.82 MB        | 50.02 MB       | 141.37 MB    | 10.7 MB          | 279.91 MB |
-| [eclipse-temurin:17-jre-alpine](./multi-stage.dockerfile) | 6.07 MB         | 20.28 MB       | 140.7 MB     | 10.7 MB          | 177.74 MB |
-| bellsoft/liberica-runtime-container:jre-17-glibc          |                 |                |              |                  |           |
-| bellsoft/liberica-runtime-container:jre-17-musl           |                 |                |              |                  |           |
-| bellsoft/liberica-runtime-container:jre-17-slim-musl      |                 |                |              |                  |           |
+| Base image                                                                              | Base image size        | Libraries size | Tooling size | Application Size | Size      |
+|-----------------------------------------------------------------------------------------|------------------------|----------------|--------------|------------------|-----------|
+| [eclipse-temurin:17-jre](./multi-stage-full.dockerfile)                                 | 77.82 MB               | 50.02 MB       | 141.37 MB    | 10.7 MB          | 279.91 MB |
+| [eclipse-temurin:17-jre-alpine](./multi-stage.dockerfile)                               | 6.07 MB                | 20.28 MB       | 140.7 MB     | 10.7 MB          | 177.74 MB |
+| [azul/zulu-openjdk:17.0.8.1-jre-headless](./multi-stage-azul.dockerfile)                | 77.82 MB (+ libraries) | ---            | 222.75 MB    | 10.7 MB          | 311.81 MB |
+| [azul/zulu-openjdk-alpine:17.0.8.1-jre-headless](./multi-stage-azul-alpine.dockerfile)  | 7.06 MB  (+ libraries) | ---            | 189.02 MB    | 10.7 MB          | 207.32 MB |
+| [ibm-semeru-runtimes:open-17.0.8_7-jre](./multi-stage-ibm.dockerfile)                   | 77.82 MB (+ libraries) | 34 MB          | 162.98 MB    | 10.7 MB          | 286.04 MB |
+| [sapmachine:17.0.8.1-jre-ubuntu](./multi-stage-sapmachine.dockerfile)                   | 77.82 MB (+ libraries) | ---            | 154.84 MB    | 10.7 MB          | 243.9 MB  |
+| [sapmachine:17.0.8.1-jre-headless-ubuntu](./multi-stage-sapmachine-headless.dockerfile) | 77.82 MB (+ libraries) | ---            | 151.37 MB    | 10.7 MB          | 240.44 MB |
+| bellsoft/liberica-runtime-container:jre-17-glibc                                        |                        |                |              |                  |           |
+| bellsoft/liberica-runtime-container:jre-17-musl                                         |                        |                |              |                  |           |
+| bellsoft/liberica-runtime-container:jre-17-slim-musl                                    |                        |                |              |                  |           |
 
 ## Custom JRE builds
 We still use the 2 steps model, but rather than using a generic JRE,
