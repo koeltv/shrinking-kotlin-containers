@@ -61,6 +61,8 @@ The jar itself has a size of `16.9 KB` and the fatJar has a size of `10.7 MB`.
 ## All-in-one builds with tools
 Here is the simplest but **heaviest** alternative, we build and run the application in a container with all the tools:
 
+<img src="./images/all-in-one-with-tools.png" width="250" alt="all-in-one with tools diagram"/>
+
 | Base image                                                              | Base image size | Libraries size | Tooling size | Application Size | Size    |
 |-------------------------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
 | [gradle:8.3-jdk17](./all-in-one-gradle-full.dockerfile)                 | 77.82 MB        | 208.13 MB      | 966.57 MB    | 29.76 MB         | 1.28 GB |
@@ -69,6 +71,8 @@ Here is the simplest but **heaviest** alternative, we build and run the applicat
 ## All-in-one builds
 A simpler, but still heavy alternative is to use the [bundled gradle wrapper](./gradlew).
 Thus, we just need an image with a JDK.
+
+<img src="./images/all-in-one.png" width="250" alt="all-in-one diagram"/>
 
 | Base image                                                              | Base image size | Libraries size | Tooling size | Application Size | Size    |
 |-------------------------------------------------------------------------|-----------------|----------------|--------------|------------------|---------|
@@ -84,6 +88,8 @@ We now create 2 distincts step:
 - We then move it to a more minimalist container with only the java runtime
 
 From this point, the size of the builder image (first step) isn't considered, as it doesn't impact the final image size.
+
+<img src="./images/multi-stage.png" width="250" alt="multi-stage diagram"/>
 
 | Base image                                                | Base image size | Libraries size | Tooling size | Application Size | Size      |
 |-----------------------------------------------------------|-----------------|----------------|--------------|------------------|-----------|
@@ -105,6 +111,8 @@ For all builds, I will use the [Eclipse Temurin JDK](https://github.com/adoptium
 At this point we don't need an image with a JDK or JRE anymore, so we have a lot of options.
 In this example, I chose to test with [debian](https://hub.docker.com/_/debian), which is one of the most used linux distribution image, and [alpine](https://hub.docker.com/_/alpine), which is known for being a very minimalistic linux distribution. 
 I am also using the [alpaquita linux distribution by Bellsoft](https://bell-sw.com/alpaquita-linux/), which is an alpine-like linux distribution tailored for JVM-based applications.
+
+<img src="./images/custom-jre.png" width="250" alt="custom jre diagram"/>
 
 | Base image                                                                 | Base image size         | Libraries size | Tooling size | Application Size | Size      |
 |----------------------------------------------------------------------------|-------------------------|----------------|--------------|------------------|-----------|
@@ -136,6 +144,8 @@ For both of those tools, you will need an image containing [a few things](https:
 - a 64-bits musl toolchain, make and configure
 - the zlib library
 
+<img src="./images/dynamic-native.png" width="250" alt="dynamic native diagram"/>
+
 In the next tables I will also specify the builder image, as it does influence the resulting application size.
 
 | Builder image                                                   | Base image                                                  | Base image size       | Libraries size | Application Size | Size     |
@@ -148,6 +158,8 @@ In the next tables I will also specify the builder image, as it does influence t
 This is pretty similar to the previous step, but in this step we also statically link all libraries, except for `libc`.
 This lets us run the application on any Linux `libc`-based distribution.
 
+<img src="./images/mostly-static.png" width="250" alt="mostly static diagram"/>
+
 | Builder image                                                   | Base image                                                             | Base image size       | Libraries size | Application Size | Size     |
 |-----------------------------------------------------------------|------------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
 | ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/base-debian12](./mostly-static-native.dockerfile)   | 1.99 MB               | 18.69 MB       | 38.97 MB         | 59.63 MB |
@@ -159,6 +171,8 @@ This lets us run the application on any Linux `libc`-based distribution.
 This is the very last step (excluding executable compression and such things that also impact performance).
 
 Instead of relaying on the OS providing the `libc` library, we also package it with the executable to create a completely static image.
+
+<img src="./images/static.png" width="250" alt="static diagram"/>
 
 | Builder image                                                       | Base image                                                                 | Base Image Size | Application Size | Size         |
 |---------------------------------------------------------------------|----------------------------------------------------------------------------|-----------------|------------------|--------------|
@@ -173,3 +187,13 @@ Why use `gcr.io/distroless/static` then ? It includes :
 - /etc/passwd: contains users and groups such as nonroot
 - /tmp
 - tzdata: in case you want to set a timezone other than UTC
+
+## Overall comparison
+
+This graph resume the differences between each step. The first 2 steps are not included as they have a far bigger size than the others (3 to 5 times compared to the next step),
+making the chart a lot less readable.
+
+For easier comparison, only the alpine-based image has been chosen at each step.
+Please note that for images that don't have distinct base image and libraries sizes, both are counted as base image size.
+
+<img src="./images/comparison-graph.png" width="100%" alt="static diagram"/>
