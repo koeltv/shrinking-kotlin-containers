@@ -104,15 +104,15 @@ For all builds, I will use the [Eclipse Temurin JDK](https://github.com/adoptium
 
 At this point we don't need an image with a JDK or JRE anymore, so we have a lot of options.
 In this example, I chose to test with [debian](https://hub.docker.com/_/debian), which is one of the most used linux distribution image, and [alpine](https://hub.docker.com/_/alpine), which is known for being a very minimalistic linux distribution. 
-I am also using the [alpaquita linux distribution by Bellsoft](https://bell-sw.com/alpaquita-linux/), which is a alpine-like linux distribution tailored for JVM-based applications.
+I am also using the [alpaquita linux distribution by Bellsoft](https://bell-sw.com/alpaquita-linux/), which is an alpine-like linux distribution tailored for JVM-based applications.
 
-| Base image                                              | Base image size         | Libraries size | Tooling size | Application Size | Size      |
-|---------------------------------------------------------|-------------------------|----------------|--------------|------------------|-----------|
-| [debian:12.1](./custom-jre-debian.dockerfile)           | 116.49 MB (+ libraries) | ---            | 65.21 MB     | 11.25 MB         | 192.94 MB |
-| [debian:12.1-slim](./custom-jre-debian-slim.dockerfile) | 74.76 MB (+ libraries)  | ---            | 65.21 MB     | 11.25 MB         | 151.21 MB |
-| [alpine:3.18.3](./custom-jre.dockerfile)                | 7.34 MB (+ libraries)   | ---            | 64.58 MB     | 11.25 MB         | 83.16 MB  |
-| bellsoft/alpaquita-linux-base                           |                         |                |              |                  |           |
-| gcr.io/distroless/java-base-debian11                    |                         |                |              |                  |           |
+| Base image                                                                 | Base image size         | Libraries size | Tooling size | Application Size | Size      |
+|----------------------------------------------------------------------------|-------------------------|----------------|--------------|------------------|-----------|
+| [debian:12.1](./custom-jre-debian.dockerfile)                              | 116.49 MB (+ libraries) | ---            | 65.21 MB     | 11.25 MB         | 192.94 MB |
+| [debian:12.1-slim](./custom-jre-debian-slim.dockerfile)                    | 74.76 MB (+ libraries)  | ---            | 65.21 MB     | 11.25 MB         | 151.21 MB |
+| [alpine:3.18.3](./custom-jre.dockerfile)                                   | 7.34 MB (+ libraries)   | ---            | 64.58 MB     | 11.25 MB         | 83.16 MB  |
+| [bellsoft/alpaquita-linux-base](./custom-jre-alpaquita.dockerfile)         | 7.44 MB (+ libraries)   | ---            | 64.58 MB     | 11.25 MB         | 83.26 MB  |
+| [gcr.io/distroless/java-base-debian12](./custom-jre-distroless.dockerfile) | 1.99 MB                 | 31.3 MB        | 65.21 MB     | 11.25 MB         | 109.75 MB |
 
 You can also play with the JLink options (`jlinkOptions` in [gradle.properties](./gradle.properties)).
 
@@ -130,6 +130,8 @@ For images including the `native-image` tool, please refer to the [graalvm regis
 
 You can also use [Liberica Native Image Kit (NIK)](https://bell-sw.com/liberica-native-image-kit/) which is based on GraalVM Open Source and might sometimes create more compact executables. If you want to learn more, see [this page](https://bell-sw.com/liberica-native-image-kit).
 
+One important difference between those tools is that most image you will find for GraalVM images are Linux-based, while Liberica Native Image Kit images are Alpine Linux based.
+
 For both of those tools, you will need an image containing [a few things](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-static-executables/) (on top of the chosen tool):
 - a 64-bits musl toolchain, make and configure
 - the zlib library
@@ -138,8 +140,8 @@ In the next tables I will also specify the builder image, as it does influence t
 
 | Builder image                                                   | Base image                                                  | Base image size       | Libraries size | Application Size | Size     |
 |-----------------------------------------------------------------|-------------------------------------------------------------|-----------------------|----------------|------------------|----------|
-| ghcr.io/graalvm/native-image-community:17                       | alpine:3.18.3                                               |                       |                |                  |          |
-| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/java-base-debian12](./native.dockerfile) | 1.99 MB               | 31.3 MB        | 38.93 MB         | 72.81 MB |
+| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/java-base-debian12](./native.dockerfile) | 1.99 MB               | 31.3 MB        | 38.93 MB         | 72.22 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./native-alpine-nik.dockerfile)             | 7.34 MB (+ libraries) | ---            | 37.75 MB         | 45.08 MB |
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./native-nik.dockerfile)    | 7.44 MB (+ libraries) | ---            | 37.75 MB         | 45.19 MB |
 
 ## Mostly static native image
@@ -148,8 +150,8 @@ This lets us run the application on any Linux `libc`-based distribution.
 
 | Builder image                                                   | Base image                                                             | Base image size       | Libraries size | Application Size | Size     |
 |-----------------------------------------------------------------|------------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
-| ghcr.io/graalvm/native-image-community:17                       | alpine:3.18.3                                                          |                       |                |                  |          |
 | ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/base-debian12](./mostly-static-native.dockerfile)   | 1.99 MB               | 18.69 MB       | 38.97 MB         | 59.63 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)          | 7.34 MB (+ libraries) | ---            | 37.8 MB          | 45.13 MB |
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./mostly-static-native-nik.dockerfile) | 7.44 MB (+ libraries) | ---            | 37.8 MB          | 45.23 MB |
 
 
@@ -160,10 +162,8 @@ Instead of relaying on the OS providing the `libc` library, we also package it w
 
 | Builder image                                                       | Base image                                                                 | Base Image Size | Application Size | Size         |
 |---------------------------------------------------------------------|----------------------------------------------------------------------------|-----------------|------------------|--------------|
-| ghcr.io/graalvm/native-image-community:17-muslib                    | alpine:3.18.3                                                              |                 |                  |              |
-| ghcr.io/graalvm/native-image-community:17-muslib                    | bellsoft/alpaquita-linux-base                                              |                 |                  |              |
 | ghcr.io/graalvm/native-image-community:17-muslib                    | [gcr.io/distroless/static-debian12](./static-native-distroless.dockerfile) | 1.99 MB         | 39.04 MB         | 41.02 MB     |
-| ghcr.io/graalvm/native-image-community:17-muslib                    | [scratch](./static-native.dockerfile)                                      | O MB            | 39.04 MB         | 39.04 MB     |
+| ghcr.io/graalvm/native-image-community:17-muslib                    | [scratch](./static-native.dockerfile)                                      | 0 MB            | 39.04 MB         | 39.04 MB     |
 | ~~bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl~~ | ~~[scratch](./static-native-nik.dockerfile)~~ **(WIP)**                    | ~~0 MB~~        | ~~39.06 MB~~     | ~~39.06 MB~~ |
 
 What is scratch ? It is the smallest possible image, as described [here](https://hub.docker.com/_/scratch).
