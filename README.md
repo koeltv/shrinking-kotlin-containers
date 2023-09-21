@@ -182,6 +182,7 @@ This lets us run the application on any Linux `libc`-based distribution.
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)          | 6.07 MB               | 1.26 MB        | 37.8 MB          | 45.13 MB |
 | bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./mostly-static-native-nik.dockerfile) | 7.44 MB (+ libraries) | ---            | 37.8 MB          | 45.23 MB |
 
+The issue here with mostly static images in alpine-linux is that it is hard to find a base image having just `glibc` or `musl lib`, but if you were to find one, it would be a small decrease from the dynamically linked native image.
 
 ## Static native image
 This is the very last step (excluding executable compression and such things that also impact performance).
@@ -215,5 +216,3 @@ Please note that for images that don't have distinct base image and libraries si
 <img src="./images/linux-comparison-graph.png" width="100%" alt="linux-based images comparison diagram"/>
 <br>
 <img src="./images/alpine-linux-comparison-graph.png" width="100%" alt="linux-based images comparison diagram"/>
-
-The issue here with mostly static images in alpine-linux is that it is hard to find a base image having just `glibc` or `musl lib`, but if you were to find one, it would be a small decrease from the dynamically linked native image.
