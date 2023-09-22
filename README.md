@@ -27,6 +27,12 @@ you can learn more about them by following [this link](https://bell-sw.com/liber
 
 "Distroless" images are images that are made to contain the bare minimum so that your application can run. It is a project maintained by Google, you can learn more about those images [here](https://github.com/GoogleContainerTools/distroless/).
 
+### Chainguard
+
+Chainguard also provides images designed for security and minimalism. They are similar to Google "distroless" images as most don't have a shell or package manager and are build using [Wolfi](https://edu.chainguard.dev/open-source/wolfi/overview),
+a linux "undistro" made specifically for containers. They also provides a tool called [Apko](https://edu.chainguard.dev/open-source/apko/overview/), giving you the possibility of creating your own minimalistic image.
+Learn more about them [here](https://edu.chainguard.dev/chainguard/chainguard-images/overview/).
+
 ### glibc / musl libc
 
 Both libraries are implementations of the C standard library for Unix-like systems. It is the interface between the application and the kernel (file interactions, network communications, ...).
@@ -91,6 +97,7 @@ Thus, we just need an image with a JDK.
 | [bellsoft/liberica-runtime-container:jdk-all-17.0.8.1-slim-musl](./all-in-one-liberica-all.dockerfile) | 214.48 MB (+ libraries) | ---            | 790.98 MB    | 10.7 MB          | 1.03 GB   |
 | [bellsoft/liberica-openjdk-alpine:17.0.8.1](./all-in-one-liberica-alpine.dockerfile)                   | 7.34 MB (+ libraries)   | 8.36 MB        | 901.6 MB     | 10.7 MB          | 947.12 MB |
 | [bellsoft/liberica-openjdk-debian:17.0.8.1](./all-in-one-liberica-debian.dockerfile)                   | 124.15 MB (+ libraries) | 38.26 MB       | 905.17 MB    | 10.7 MB          | 1.09 GB   |
+| [cgr.dev/chainguard/jdk](./all-in-one-chainguard.dockerfile)                                           | 276.74 MB (+ libraries) | ---            | 791.01 MB    | 10.7 MB          | 1.09 GB   |
 
 ## Multi-stage builds
 We now create 2 distincts step:
@@ -114,6 +121,7 @@ From this point, the size of the builder image (first step) isn't considered, as
 | [bellsoft/liberica-openjre-alpine:17.0.8.1](./multi-stage-liberica-alpine.dockerfile)                | 7.34 MB (+ libraries)   | 8.36 MB        | 158.32 MB    | 10.7 MB          | 185.25 MB |
 | [bellsoft/liberica-openjre-debian:17.0.8.1](./multi-stage-liberica-debian.dockerfile)                | 124.15 MB (+ libraries) | 38.26 MB       | 142.64 MB    | 10.7 MB          | 316.29 MB |
 | [bellsoft/liberica-runtime-container:jre-17.0.8.1-slim-musl](./multi-stage-liberica-slim.dockerfile) | 113.48 MB (+ libraries) | ---            | ---          | 10.7 MB          | 124.72 MB |
+| [cgr.dev/chainguard/jre](./multi-stage-chainguard.dockerfile)                                        | 275.52 MB (+ libraries) | ---            | ---          | 10.7 MB          | 286.76 MB |
 
 ## Custom JRE builds
 We still use the 2 steps model, but rather than using a generic JRE,
@@ -137,6 +145,7 @@ I am also using the [alpaquita linux distribution by Bellsoft](https://bell-sw.c
 | [alpine:3.18.3](./custom-jre.dockerfile)                                   | 6.07 MB               | 1.26 MB        | 65.13 MB     | 10.7 MB          | 83.16 MB  |
 | [bellsoft/alpaquita-linux-base](./custom-jre-alpaquita.dockerfile)         | 7.44 MB (+ libraries) | ---            | 65.13 MB     | 10.7 MB          | 83.26 MB  |
 | [gcr.io/distroless/java-base-debian12](./custom-jre-distroless.dockerfile) | 1.99 MB               | 31.3 MB        | 65.76 MB     | 10.7 MB          | 109.75 MB |
+| [cgr.dev/chainguard/wolfi-base](./custom-jre-chainguard.dockerfile)        | 13.69 MB              | ---            | 65.21 MB     | 10.7 MB          | 90.13 MB  |
 
 You can also play with the JLink options (`jlinkOptions` in [gradle.properties](./gradle.properties)).
 
@@ -164,11 +173,12 @@ For both of those tools, you will need an image containing [a few things](https:
 
 In the next tables I will also specify the builder image, as it does influence the resulting application size.
 
-| Builder image                                                   | Base image                                                  | Base image size       | Libraries size | Application Size | Size     |
-|-----------------------------------------------------------------|-------------------------------------------------------------|-----------------------|----------------|------------------|----------|
-| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/java-base-debian12](./native.dockerfile) | 1.99 MB               | 31.3 MB        | 38.93 MB         | 72.22 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./native-alpine-nik.dockerfile)             | 6.07 MB               | 1.26 MB        | 37.75 MB         | 45.08 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./native-nik.dockerfile)    | 7.44 MB (+ libraries) | ---            | 37.75 MB         | 45.19 MB |
+| Builder image                                                   | Base image                                                          | Base image size       | Libraries size | Application Size | Size     |
+|-----------------------------------------------------------------|---------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
+| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/java-base-debian12](./native.dockerfile)         | 1.99 MB               | 31.3 MB        | 38.93 MB         | 72.22 MB |
+| ghcr.io/graalvm/native-image-community:17                       | [cgr.dev/chainguard/graalvm-native](./native-chainguard.dockerfile) | 59.91 MB              | ---            | 38.93 MB         | 98.83 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./native-alpine-nik.dockerfile)                     | 6.07 MB               | 1.26 MB        | 37.75 MB         | 45.08 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./native-nik.dockerfile)            | 7.44 MB (+ libraries) | ---            | 37.75 MB         | 45.19 MB |
 
 ## Mostly static native image
 This is pretty similar to the previous step, but in this step we also statically link all libraries, except for `libc`.
@@ -176,11 +186,12 @@ This lets us run the application on any Linux `libc`-based distribution.
 
 <img src="./images/mostly-static.png" width="250" alt="mostly static diagram"/>
 
-| Builder image                                                   | Base image                                                             | Base image size       | Libraries size | Application Size | Size     |
-|-----------------------------------------------------------------|------------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
-| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/base-debian12](./mostly-static-native.dockerfile)   | 1.99 MB               | 18.69 MB       | 38.97 MB         | 59.63 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)          | 6.07 MB               | 1.26 MB        | 37.8 MB          | 45.13 MB |
-| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./mostly-static-native-nik.dockerfile) | 7.44 MB (+ libraries) | ---            | 37.8 MB          | 45.23 MB |
+| Builder image                                                   | Base image                                                                       | Base image size       | Libraries size | Application Size | Size     |
+|-----------------------------------------------------------------|----------------------------------------------------------------------------------|-----------------------|----------------|------------------|----------|
+| ghcr.io/graalvm/native-image-community:17                       | [gcr.io/distroless/base-debian12](./mostly-static-native.dockerfile)             | 1.99 MB               | 18.69 MB       | 38.97 MB         | 59.63 MB |
+| ghcr.io/graalvm/native-image-community:17                       | [cgr.dev/chainguard/glibc-dynamic](./mostly-static-native-chainguard.dockerfile) | 9.46 MB               | ---            | 38.97 MB         | 48.43 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [alpine:3.18.3](./mostly-static-native-alpine-nik.dockerfile)                    | 6.07 MB               | 1.26 MB        | 37.8 MB          | 45.13 MB |
+| bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl | [bellsoft/alpaquita-linux-base](./mostly-static-native-nik.dockerfile)           | 7.44 MB (+ libraries) | ---            | 37.8 MB          | 45.23 MB |
 
 The issue here with mostly static images in alpine-linux is that it is hard to find a base image having just `glibc` or `musl lib`, but if you were to find one, it would be a small decrease from the dynamically linked native image.
 
@@ -194,6 +205,7 @@ Instead of relaying on the OS providing the `libc` library, we also package it w
 | Builder image                                                       | Base image                                                                 | Base Image Size | Application Size | Size         |
 |---------------------------------------------------------------------|----------------------------------------------------------------------------|-----------------|------------------|--------------|
 | ghcr.io/graalvm/native-image-community:17-muslib                    | [gcr.io/distroless/static-debian12](./static-native-distroless.dockerfile) | 1.99 MB         | 39.04 MB         | 41.02 MB     |
+| ghcr.io/graalvm/native-image-community:17-muslib                    | [cgr.dev/chainguard/static](./static-native-chainguard.dockerfile)         | 9.46 MB         | 39.04 MB         | 48.43 MB     |
 | ghcr.io/graalvm/native-image-community:17-muslib                    | [scratch](./static-native.dockerfile)                                      | 0 MB            | 39.04 MB         | 39.04 MB     |
 | ~~bellsoft/liberica-native-image-kit-container:jdk-17-nik-22-musl~~ | ~~[scratch](./static-native-nik.dockerfile)~~ **(WIP)**                    | ~~0 MB~~        | ~~39.06 MB~~     | ~~39.06 MB~~ |
 
